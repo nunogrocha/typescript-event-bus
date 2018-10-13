@@ -1,30 +1,29 @@
 import "core-js/fn/array/find";
 import "core-js/fn/array/filter";
-import { IEventDomain, IEventSubscription, IEventBroadcast } from "./Interfaces";
+import { IEventSubscription, IEventBroadcast, IDomainEvent } from "./Interfaces";
+import DomainEvent from "./DomainEvent";
 
 export default abstract class EventProcessor {
-	domains: IEventDomain[];
-	subscriptions: IEventSubscription[];
+	private _log: DomainEvent<any>[];
+	private _subscriptions: IEventSubscription[];
 
-	constructor() {
-		this.domains = [];
-		this.subscriptions = [];
+	constructor(private isLogging: boolean) {
+		this._subscriptions = [];
+		if (this.isLogging) {
+			this._log = [];
+		}
 	}
 
 	/**
-	 * Adds a domain to the event processor
+	 * Releases a domain and all its channels and subscribers from the event processor
 	 * @param domain 
 	 */
-	connect(domain: IEventDomain) {
-		this.domains.push(domain);
-	}
-
-	/**
-	 * Releases a domain from the event processor
-	 * @param domain 
-	 */
-	disconnect(domain: string) {
-		this.domains = this.domains.filter(d => d.domain === domain);
+	disconnectDomain(domain: string) {
+		if (domain) {
+			this._subscriptions = this._subscriptions.filter(s => s.domain !== domain);
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -33,10 +32,11 @@ export default abstract class EventProcessor {
 	 */
 	subscribe(subscription: IEventSubscription) {
 		const that = this;
-		const index = this.subscriptions.push(subscription);
+		const index = this._subscriptions.push(subscription);
 		return {
+			index: index,
 			unsubscribe: function() {
-				that.subscriptions.splice(index, 1);
+				that._subscriptions.splice(index - 1, 1);
 			}
 		}
 	}
@@ -44,10 +44,37 @@ export default abstract class EventProcessor {
 	/**
 	 * Notifies domains channel subscribers
 	 */
-	broadcast<T>(e: IEventBroadcast<T>) {
-		const subscription = this.subscriptions.find(sub => sub.channel === e.channel && sub.domain === e.domain);
-		if (subscription) {
-			subscription.callback(e.payload);
+	broadcastChannel<T>(e: IEventBroadcast<T>) {
+		this._subscriptions.forEach(sub => {
+			if (sub.channel === e.channel && sub.domain === e.domain) {
+				this.process(e, sub);
+			}
+		});
+	}
+
+	/**
+	 * Notifies domains channel subscribers
+	 */
+	broadcastDomain<T>(e: IEventBroadcast<T>) {
+		this._subscriptions.forEach(sub => {
+			if (sub.domain === e.domain) {
+				this.process(e, sub);
+			}
+		});
+	}
+
+	private process<T>(e: IEventBroadcast<T>, sub: IEventSubscription) {
+		if (this.isLogging) {
+			this._log.push(new DomainEvent<T>({
+				payload: e.payload,
+				domain: e.domain,
+				channel: e.channel
+			}))
 		}
+		sub.callback(e.payload)
+	}
+
+	get logs(): IDomainEvent<any>[] {
+		return this._log.map(log => log.toJSON());
 	}
 }

@@ -1,8 +1,3 @@
-export interface IEventDomain {
-	domain: string;
-	channels: string[];
-}
-
 export interface IEventSubscription {
 	domain: string;
 	channel: string;
@@ -12,7 +7,11 @@ export interface IEventSubscription {
 export interface IEventBroadcast<T> {
 	payload: T;
 	domain: string;
-	channel: string;
+	channel?: null | string;
 }
 
-export type EventCallback = (payload: {}) => void;
+export type EventCallback = (payload: any) => void;
+
+export interface IDomainEvent<T> extends IEventBroadcast<T> {
+	recorded?: Date;
+}

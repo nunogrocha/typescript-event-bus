@@ -1,9 +1,18 @@
-export default abstract class DomainEvent {
-	private recorded: Date;
+import { IDomainEvent } from "./Interfaces";
 
-	constructor(occurred: Date) {
-		this.recorded = new Date();
+export default class DomainEvent<T> {
+	private _recorded: Date;
+
+	constructor(private evt: IDomainEvent<T>) {
+		this._recorded = evt.recorded || new Date();
 	}
 
-	abstract process(): void
+	toJSON(): IDomainEvent<T> {
+		return {
+			payload: this.evt.payload,
+			domain: this.evt.domain,
+			channel: this.evt.channel,
+			recorded: this._recorded
+		}
+	}
 }
