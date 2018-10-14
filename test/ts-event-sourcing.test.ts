@@ -1,4 +1,5 @@
 import EventProcessor from '../src/EventProcessor'
+import DomainEvent from '../src/middlewares/DomainEvent'
 import { IEventBroadcast, MiddlewareNext, MiddlewareCallback } from '../src/Interfaces'
 
 class EventManager extends EventProcessor {
@@ -94,7 +95,15 @@ describe('EventProcessor test', () => {
   })
 
   it('EventManager can run middleware', () => {
+    const logs = []
     const middlewareFn = (e: IEventBroadcast<{}>, next: MiddlewareNext<{}>) => {
+      logs.push(
+        new DomainEvent<{}>({
+          payload: e.payload,
+          domain: e.domain,
+          channel: e.channel
+        }).toJSON()
+      )
       next(e)
     }
     const em = new EventManager([middlewareFn])
@@ -111,10 +120,25 @@ describe('EventProcessor test', () => {
     em.broadcastDomain({
       domain: 'test_c',
       channel: null,
-      payload: 'test'
+      payload: 'test 1'
     })
 
-    expect(resultA).toEqual('test')
+    em.broadcastDomain({
+      domain: 'test_c',
+      channel: null,
+      payload: 'test 2'
+    })
+
+    em.broadcastDomain({
+      domain: 'test_c',
+      channel: null,
+      payload: 'test 3'
+    })
+
+    expect(resultA).toEqual('test 3')
+    expect(logs[0].payload).toEqual('test 1')
+    expect(logs[1].payload).toEqual('test 2')
+    expect(logs[2].payload).toEqual('test 3')
   })
 
   it('EventManager can broadcast to every subscriber in a domain', () => {
