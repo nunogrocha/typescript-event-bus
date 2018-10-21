@@ -1,11 +1,11 @@
 {
-  "name": "ts-event-sourcing",
-  "version": "0.0.2",
+  "name": "ts-event-bus",
+  "version": "0.0.3",
   "description": "",
   "keywords": [],
-  "main": "dist/ts-event-sourcing.umd.js",
-  "module": "dist/ts-event-sourcing.es5.js",
-  "typings": "dist/types/ts-event-sourcing.d.ts",
+  "main": "dist/ts-event-bus.umd.js",
+  "module": "dist/ts-event-bus.es5.js",
+  "typings": "dist/types/ts-event-bus.d.ts",
   "files": [
     "dist"
   ],
