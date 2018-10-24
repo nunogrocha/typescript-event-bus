@@ -15,6 +15,27 @@ describe('EventBus test', () => {
     expect(new EventBus()).toBeInstanceOf(EventBus)
   })
 
+  it('EventBus can emit events', done => {
+    const em = new EventBus()
+    let result = null
+
+    em.register({
+      channel: 'b',
+      callback: payload => {
+        expect(payload).toEqual({
+          test: false
+        });
+        done();
+      }
+    })
+
+    em.trigger(
+      new DomainEvent<{}>('b', {
+        test: false
+      })
+    );
+  })
+
   it('EventBus can subscribe', () => {
     const em = new EventBus()
     let result = null
@@ -65,11 +86,11 @@ describe('EventBus test', () => {
       callback: cb
     })
 
-    expect((em as any)._subscriptions[0]).toEqual({
+    expect(em.subscriptions[0]).toEqual({
       channel: 'b',
       callback: cb
     })
-    expect((em as any)._subscriptions[1]).toEqual({
+    expect(em.subscriptions[1]).toEqual({
       channel: 'a',
       callback: cb
     })
@@ -78,6 +99,35 @@ describe('EventBus test', () => {
     em.unregister('a')
     expect((em as any)._subscriptions.length).toEqual(1)
     em.unregister('b')
+
+    expect((em as any)._subscriptions.length).toEqual(0)
+  })
+
+  it('EventBus can disconnect all subscribers', () => {
+    const em = new EventBus()
+    const cb = (payload: any) => null
+
+    em.register({
+      channel: 'b',
+      callback: cb
+    })
+
+    em.register({
+      channel: 'a',
+      callback: cb
+    })
+
+    expect(em.subscriptions[0]).toEqual({
+      channel: 'b',
+      callback: cb
+    })
+    expect(em.subscriptions[1]).toEqual({
+      channel: 'a',
+      callback: cb
+    })
+    expect((em as any)._subscriptions.length).toEqual(2)
+
+    em.unregisterAll()
 
     expect((em as any)._subscriptions.length).toEqual(0)
   })
@@ -97,6 +147,7 @@ describe('EventBus test', () => {
     })
 
     expect((em as any)._subscriptions.length).toEqual(1)
+    expect(em.middleware.length).toEqual(1)
 
     em.trigger(new DomainEvent<{}>('a', 'test 1'))
 
