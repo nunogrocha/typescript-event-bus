@@ -1,6 +1,5 @@
 # TypeScript Event Bus
 
-
 ## Main Features
  * Typed interfaces and callbacks
  * Middleware
