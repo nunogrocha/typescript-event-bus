@@ -1,4 +1,4 @@
-import { EventBus, MiddlewareNext, IDomainEvent, DomainEvent } from '../src'
+import { EventBus, MiddlewareNext, IDomainEvent, DomainEvent } from '../src/ts-event-bus'
 
 /**
  * Event Bus test
