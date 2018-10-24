@@ -1,7 +1,4 @@
-import { EventBus } from '../src/EventBus'
-import { DomainEvent } from '../src/DomainEvent'
-import { IDomainEvent } from '../src/IDomainEvent'
-import { MiddlewareNext } from '../src/types'
+import { EventBus, MiddlewareNext, IDomainEvent, DomainEvent } from '../src'
 
 /**
  * Event Bus test
