@@ -1,6 +1,6 @@
 {
-  "name": "typescript-event-bus",
-  "version": "1.1.0",
+  "name": "@nunogcrocha/typescript-event-bus",
+  "version": "1.1.1",
   "description": "",
   "keywords": [],
   "main": "dist/ts-event-bus.umd.js",
